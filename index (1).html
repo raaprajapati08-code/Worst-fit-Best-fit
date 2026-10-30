@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MemVitals - Memory Allocation Simulator (Best-Fit vs Worst-Fit)</title>
+  <meta name="description" content="Subtle pastel health-dashboard styled memory allocation simulator comparing Best-Fit, Worst-Fit, and First-Fit algorithms for variable-size memory partitioning.">
+  <link rel="stylesheet" href="styles.css">
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+  <div class="app-container">
+
+    <!-- Top Navigation & Brand Header -->
+    <header class="app-header">
+      <div class="brand-section">
+        <div class="brand-icon-box">
+          <i data-lucide="cpu"></i>
+        </div>
+        <div class="brand-title-wrap">
+          <h1>
+            MemVitals Lab
+            <span class="academic-badge">SLA Stage 3 • OS</span>
+          </h1>
+          <p>Memory Management Simulation & Partitioning Analysis</p>
+        </div>
+      </div>
+
+      <!-- Strategy Switcher Tabs -->
+      <nav class="strategy-switcher" aria-label="Allocation Strategies">
+        <button class="nav-tab-btn active" id="tab-best-fit" data-strategy="best-fit">
+          <i data-lucide="check-circle-2" style="width:16px;height:16px;"></i>
+          Best-Fit
+        </button>
+        <button class="nav-tab-btn" id="tab-worst-fit" data-strategy="worst-fit">
+          <i data-lucide="maximize-2" style="width:16px;height:16px;"></i>
+          Worst-Fit
+        </button>
+        <button class="nav-tab-btn" id="tab-first-fit" data-strategy="first-fit">
+          <i data-lucide="arrow-right-circle" style="width:16px;height:16px;"></i>
+          First-Fit
+        </button>
+        <button class="nav-tab-btn" id="tab-compare" data-strategy="compare">
+          <i data-lucide="columns-2" style="width:16px;height:16px;"></i>
+          Compare Both
+        </button>
+      </nav>
+
+      <!-- Header Action Buttons -->
+      <div class="header-actions">
+        <button class="btn btn-outline btn-sm" id="btn-view-c-code" title="View C Code Source from SLA">
+          <i data-lucide="code-2" style="width:15px;height:15px;"></i>
+          C Source
+        </button>
+        <button class="btn btn-secondary btn-sm" id="btn-export-report" title="Generate Academic Evaluation Report">
+          <i data-lucide="file-text" style="width:15px;height:15px;"></i>
+          SLA Report
+        </button>
+      </div>
+    </header>
+
+    <!-- Vitals KPI Summary Cards (Pastel Health-Dashboard Style) -->
+    <section class="vitals-grid" aria-label="Memory Health Vitals">
+      <!-- Card 1: Total Memory -->
+      <div class="vital-card">
+        <div class="vital-icon-box">
+          <i data-lucide="hard-drive"></i>
+        </div>
+        <div class="vital-info">
+          <span class="vital-label">Total Free Memory</span>
+          <span class="vital-value" id="kpi-total-memory">1,700 <small style="font-size: 0.9rem; font-weight:600;">KB</small></span>
+          <span class="vital-subtext">
+            Across <strong id="kpi-block-count">5</strong> Partitions
+          </span>
+        </div>
+      </div>
+
+      <!-- Card 2: Memory Utilization -->
+      <div class="vital-card">
+        <div class="vital-icon-box" style="color: #10B981; background: #ECFDF5;">
+          <i data-lucide="activity"></i>
+        </div>
+        <div class="vital-info">
+          <span class="vital-label">Memory Utilization</span>
+          <span class="vital-value" id="kpi-utilization">68.65%</span>
+          <span class="vital-subtext">
+            <span class="badge-pill" style="background:#ECFDF5; color:#10B981;" id="kpi-allocated-kb">1,167 KB Used</span>
+          </span>
+        </div>
+      </div>
+
+      <!-- Card 3: Allocation Success -->
+      <div class="vital-card">
+        <div class="vital-icon-box" style="color: #8B5CF6; background: #F3F0FF;">
+          <i data-lucide="check-check"></i>
+        </div>
+        <div class="vital-info">
+          <span class="vital-label">Allocation Success</span>
+          <span class="vital-value" id="kpi-success-rate">4 / 4</span>
+          <span class="vital-subtext">
+            <span class="badge-pill" style="background:#F3F0FF; color:#8B5CF6;" id="kpi-success-pct">100% Accommodated</span>
+          </span>
+        </div>
+      </div>
+
+      <!-- Card 4: Fragmentation / Leftover -->
+      <div class="vital-card">
+        <div class="vital-icon-box" style="color: #F59E0B; background: #FFFBEB;">
+          <i data-lucide="split"></i>
+        </div>
+        <div class="vital-info">
+          <span class="vital-label">External Fragmentation</span>
+          <span class="vital-value" id="kpi-fragmentation">0 <small style="font-size: 0.9rem; font-weight:600;">KB</small></span>
+          <span class="vital-subtext" id="kpi-fragmentation-note">
+            Remaining Space: <strong id="kpi-remaining-space">533 KB</strong>
+          </span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Strategy Banner & Scenario Selector -->
+    <section class="strategy-banner">
+      <div class="strategy-meta">
+        <div class="strategy-badge-icon" id="strategy-icon">
+          <i data-lucide="check-circle-2"></i>
+        </div>
+        <div class="strategy-details">
+          <h2 id="strategy-title">Best-Fit Allocation Strategy</h2>
+          <p id="strategy-description">
+            Searches all free memory blocks and selects the <strong>smallest suitable block</strong> that can accommodate the process requirement to minimize immediate leftover waste.
+          </p>
+        </div>
+      </div>
+
+      <div class="preset-selector-group">
+        <label for="scenario-preset-select" class="preset-label">Test Case Preset:</label>
+        <select id="scenario-preset-select" class="preset-select">
+          <option value="sla-benchmark" selected>TC1: SLA 3 Benchmark (Default)</option>
+          <option value="worst-fit-failure">TC2: P4 Too Large for Worst-Fit</option>
+          <option value="fragmentation-demo">TC3: External Fragmentation Gap</option>
+          <option value="best-fit-sliver">TC4: Best-Fit Sliver Drawback</option>
+          <option value="custom">TC5: Custom Input Configuration</option>
+        </select>
+      </div>
+    </section>
+
+    <!-- Standard Single Strategy View -->
+    <main id="single-strategy-view" class="main-layout-grid">
+      
+      <!-- Left Panel: Input Configuration & Controls -->
+      <aside class="left-panel">
+        
+        <!-- Memory Blocks Card -->
+        <section class="card" aria-labelledby="heading-blocks">
+          <div class="card-header">
+            <div class="card-title-group">
+              <div class="card-icon-tile">
+                <i data-lucide="layers" style="width:18px;height:18px;"></i>
+              </div>
+              <h2 class="card-title" id="heading-blocks">Memory Blocks</h2>
+            </div>
+            <span class="card-count-badge" id="badge-blocks-count">5 Blocks</span>
+          </div>
+
+          <div class="items-list" id="blocks-list-container">
+            <!-- Dynamically populated -->
+          </div>
+
+          <!-- Add Block Form -->
+          <form id="form-add-block" class="add-item-form">
+            <input 
+              type="number" 
+              id="input-block-size" 
+              class="input-box" 
+              placeholder="Block Size (KB)" 
+              min="1" 
+              max="10000" 
+              required
+            >
+            <button type="submit" class="btn btn-secondary btn-sm" id="btn-add-block">
+              <i data-lucide="plus" style="width:14px;height:14px;"></i>
+              Add Block
+            </button>
+          </form>
+        </section>
+
+        <!-- Processes Card -->
+        <section class="card" aria-labelledby="heading-processes">
+          <div class="card-header">
+            <div class="card-title-group">
+              <div class="card-icon-tile">
+                <i data-lucide="terminal" style="width:18px;height:18px;"></i>
+              </div>
+              <h2 class="card-title" id="heading-processes">Process Queue</h2>
+            </div>
+            <span class="card-count-badge" id="badge-processes-count">4 Processes</span>
+          </div>
+
+          <div class="items-list" id="processes-list-container">
+            <!-- Dynamically populated -->
+          </div>
+
+          <!-- Add Process Form -->
+          <form id="form-add-process" class="add-item-form">
+            <input 
+              type="number" 
+              id="input-process-size" 
+              class="input-box" 
+              placeholder="Process Size (KB)" 
+              min="1" 
+              max="10000" 
+              required
+            >
+            <button type="submit" class="btn btn-secondary btn-sm" id="btn-add-process">
+              <i data-lucide="plus" style="width:14px;height:14px;"></i>
+              Add Process
+            </button>
+          </form>
+        </section>
+
+        <!-- Quick Action Tiles (2x2 Grid) -->
+        <section class="card" aria-labelledby="heading-actions">
+          <div class="card-header">
+            <div class="card-title-group">
+              <div class="card-icon-tile">
+                <i data-lucide="sparkles" style="width:18px;height:18px;"></i>
+              </div>
+              <h2 class="card-title" id="heading-actions">Quick Actions</h2>
+            </div>
+          </div>
+
+          <div class="quick-tiles-grid">
+            <button class="quick-tile-btn" id="btn-quick-run">
+              <div class="quick-tile-icon"><i data-lucide="play-circle"></i></div>
+              <span class="quick-tile-title">Simulate All</span>
+              <span class="quick-tile-desc">Run full allocation</span>
+            </button>
+
+            <button class="quick-tile-btn" id="btn-quick-step">
+              <div class="quick-tile-icon"><i data-lucide="step-forward"></i></div>
+              <span class="quick-tile-title">Step One</span>
+              <span class="quick-tile-desc">Allocate next process</span>
+            </button>
+
+            <button class="quick-tile-btn" id="btn-quick-reset">
+              <div class="quick-tile-icon"><i data-lucide="rotate-ccw"></i></div>
+              <span class="quick-tile-title">Reset RAM</span>
+              <span class="quick-tile-desc">Clear allocations</span>
+            </button>
+
+            <button class="quick-tile-btn" id="btn-quick-benchmark">
+              <div class="quick-tile-icon"><i data-lucide="bookmark"></i></div>
+              <span class="quick-tile-title">SLA Sample</span>
+              <span class="quick-tile-desc">Load SLA 3 numbers</span>
+            </button>
+          </div>
+        </section>
+
+      </aside>
+
+      <!-- Right Panel: Live Visualization, Stepper, & Tables -->
+      <section class="right-panel">
+        
+        <!-- Simulation Playback Bar -->
+        <div class="playback-bar">
+          <div class="playback-controls">
+            <button class="btn btn-outline btn-icon" id="btn-step-prev" title="Previous Step">
+              <i data-lucide="chevron-left" style="width:18px;height:18px;"></i>
+            </button>
+            <button class="btn btn-primary" id="btn-playback-toggle">
+              <i data-lucide="play" style="width:16px;height:16px;" id="icon-play-state"></i>
+              <span id="text-play-state">Auto Play</span>
+            </button>
+            <button class="btn btn-outline btn-icon" id="btn-step-next" title="Next Step">
+              <i data-lucide="chevron-right" style="width:18px;height:18px;"></i>
+            </button>
+            <button class="btn btn-outline btn-sm" id="btn-reset-sim">
+              <i data-lucide="rotate-ccw" style="width:14px;height:14px;"></i>
+              Reset
+            </button>
+          </div>
+
+          <div class="playback-status-text" id="playback-step-badge">
+            <i data-lucide="clock" style="width:15px;height:15px; color:var(--accent-primary);"></i>
+            <span>Ready • Step 0 of 4</span>
+          </div>
+
+          <div class="speed-control-wrap">
+            <span>Speed:</span>
+            <input type="range" id="sim-speed" class="speed-slider" min="300" max="2000" value="900" step="100">
+          </div>
+        </div>
+
+        <!-- Decision Tracer Log (Shows algorithmic thought at each step) -->
+        <div class="decision-tracer-card">
+          <div class="tracer-header">
+            <span class="tracer-title">
+              <i data-lucide="cpu" style="width:14px;height:14px; color:var(--accent-primary);"></i>
+              Allocation Engine Tracer
+            </span>
+            <span class="badge badge-neutral" id="tracer-status-badge">Idle</span>
+          </div>
+          <div class="tracer-text" id="tracer-message">
+            Click "Auto Play", "Step One", or "Simulate All" to trace memory block evaluation.
+          </div>
+        </div>
+
+        <!-- Visual RAM Partition Map -->
+        <div class="viz-section">
+          <div class="viz-header">
+            <div class="viz-title-group">
+              <h3>Physical Memory Partition Map</h3>
+              <p>Visual breakdown of allocated processes and remaining free space</p>
+            </div>
+            <div class="viz-legend">
+              <div class="legend-item">
+                <span class="legend-dot allocated"></span>
+                <span>Allocated</span>
+              </div>
+              <div class="legend-item">
+                <span class="legend-dot free"></span>
+                <span>Free Space</span>
+              </div>
+              <div class="legend-item">
+                <span class="legend-dot evaluating"></span>
+                <span>Evaluating</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Dynamic Memory Blocks Representation -->
+          <div class="memory-blocks-grid" id="memory-tracks-container">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+
+        <!-- Process Allocation Table with Filter & Search -->
+        <div class="table-section">
+          <div class="table-toolbar">
+            <div class="filter-group">
+              <button class="filter-btn active" data-filter="all">All Processes</button>
+              <button class="filter-btn" data-filter="allocated">Allocated Only</button>
+              <button class="filter-btn" data-filter="unallocated">Unallocated Only</button>
+            </div>
+
+            <div class="search-box-wrap">
+              <i data-lucide="search" class="search-icon"></i>
+              <input type="text" id="search-processes" class="search-box" placeholder="Search PID or KB...">
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="styled-table" id="allocation-table">
+              <thead>
+                <tr>
+                  <th>Process</th>
+                  <th>Memory Required</th>
+                  <th>Assigned Block</th>
+                  <th>Block Initial</th>
+                  <th>Remaining Free</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="allocation-table-body">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </section>
+    </main>
+
+    <!-- Side-by-Side Dual Comparison Mode View (Hidden by default, shown on Compare tab) -->
+    <main id="comparison-mode-view" class="comparison-grid" style="display: none;">
+      
+      <!-- Best-Fit Column -->
+      <section class="comparison-column" id="best-fit-col">
+        <div class="comparison-header">
+          <div>
+            <h3>Best-Fit Strategy</h3>
+            <p style="font-size: 0.8rem; color: var(--text-sub);">Chooses smallest suitable partition</p>
+          </div>
+          <span class="badge badge-success" id="comp-best-badge">4 / 4 Allocated</span>
+        </div>
+
+        <!-- RAM Blocks Mini Visualizer -->
+        <div class="memory-blocks-grid" id="comp-best-ram-tracks">
+          <!-- Populated by JS -->
+        </div>
+
+        <!-- Mini Table -->
+        <div class="table-responsive">
+          <table class="styled-table" id="comp-best-table">
+            <thead>
+              <tr>
+                <th>Process</th>
+                <th>Req</th>
+                <th>Block</th>
+                <th>Left</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="comp-best-table-body"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Worst-Fit Column -->
+      <section class="comparison-column" id="worst-fit-col">
+        <div class="comparison-header">
+          <div>
+            <h3>Worst-Fit Strategy</h3>
+            <p style="font-size: 0.8rem; color: var(--text-sub);">Chooses largest suitable partition</p>
+          </div>
+          <span class="badge badge-warning" id="comp-worst-badge">3 / 4 Allocated</span>
+        </div>
+
+        <!-- RAM Blocks Mini Visualizer -->
+        <div class="memory-blocks-grid" id="comp-worst-ram-tracks">
+          <!-- Populated by JS -->
+        </div>
+
+        <!-- Mini Table -->
+        <div class="table-responsive">
+          <table class="styled-table" id="comp-worst-table">
+            <thead>
+              <tr>
+                <th>Process</th>
+                <th>Req</th>
+                <th>Block</th>
+                <th>Left</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="comp-worst-table-body"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Full Comparison Matrix Table (Recreates SLA 3 Academic Table) -->
+      <section class="card" style="grid-column: 1 / -1;">
+        <div class="card-header">
+          <div class="card-title-group">
+            <div class="card-icon-tile">
+              <i data-lucide="scale" style="width:18px;height:18px;"></i>
+            </div>
+            <h2 class="card-title">Comparative Performance Summary Matrix</h2>
+          </div>
+          <span class="academic-badge">Stage 3 Evaluation Table</span>
+        </div>
+
+        <div class="table-responsive">
+          <table class="styled-table">
+            <thead>
+              <tr>
+                <th>Performance Measure</th>
+                <th>Best-Fit</th>
+                <th>Worst-Fit</th>
+                <th>Advantage / Outcome</th>
+              </tr>
+            </thead>
+            <tbody id="matrix-table-body">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Modal 1: C Source Code Viewer -->
+    <div class="modal-overlay" id="modal-c-code">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Original C Program Implementation (SLA Stage 3)</h3>
+          <button class="btn btn-outline btn-icon" id="btn-close-c-modal">
+            <i data-lucide="x" style="width:16px;height:16px;"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p style="font-size:0.85rem; color:var(--text-sub);">
+            This is the exact C code model designed for <strong>Operating Systems (CMCOR2PC202)</strong>, implementing both Best-Fit and Worst-Fit algorithms with variable memory partitioning.
+          </p>
+          <pre class="code-block-container" id="c-code-content"><code>#include &lt;stdio.h&gt;
+#define MAX 100
+
+void bestFit(int blocks[], int m, int process[], int n) {
+    int i, j, best;
+    int freeBlock[MAX];
+    for (i = 0; i &lt; m; i++) freeBlock[i] = blocks[i];
+    
+    printf("\n--- BEST-FIT ALLOCATION ---\n");
+    for (i = 0; i &lt; n; i++) {
+        best = -1;
+        for (j = 0; j &lt; m; j++) {
+            if (freeBlock[j] &gt;= process[i] &amp;&amp; (best == -1 || freeBlock[j] &lt; freeBlock[best])) {
+                best = j;
+            }
+        }
+        if (best != -1) {
+            freeBlock[best] -= process[i];
+            printf("P%d (%d KB) -> Block %d, Remaining = %d KB\n", i + 1, process[i], best + 1, freeBlock[best]);
+        } else {
+            printf("P%d (%d KB) -> Not allocated\n", i + 1, process[i]);
+        }
+    }
+}
+
+void worstFit(int blocks[], int m, int process[], int n) {
+    int i, j, worst;
+    int freeBlock[MAX];
+    for (i = 0; i &lt; m; i++) freeBlock[i] = blocks[i];
+    
+    printf("\n--- WORST-FIT ALLOCATION ---\n");
+    for (i = 0; i &lt; n; i++) {
+        worst = -1;
+        for (j = 0; j &lt; m; j++) {
+            if (freeBlock[j] &gt;= process[i] &amp;&amp; (worst == -1 || freeBlock[j] &gt; freeBlock[worst])) {
+                worst = j;
+            }
+        }
+        if (worst != -1) {
+            freeBlock[worst] -= process[i];
+            printf("P%d (%d KB) -> Block %d, Remaining = %d KB\n", i + 1, process[i], worst + 1, freeBlock[worst]);
+        } else {
+            printf("P%d (%d KB) -> Not allocated\n", i + 1, process[i]);
+        }
+    }
+}</code></pre>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" id="btn-copy-c-code">
+            <i data-lucide="copy" style="width:14px;height:14px;"></i>
+            Copy Code
+          </button>
+          <button class="btn btn-primary" id="btn-done-c-code">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal 2: Academic SLA Report Exporter -->
+    <div class="modal-overlay" id="modal-report">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Academic SLA Stage 3 Evaluation Summary</h3>
+          <button class="btn btn-outline btn-icon" id="btn-close-report-modal">
+            <i data-lucide="x" style="width:16px;height:16px;"></i>
+          </button>
+        </div>
+        <div class="modal-body" id="printable-report-area">
+          <div style="text-align: center; border-bottom: 1px solid var(--border-subtle); padding-bottom: 12px;">
+            <h4 style="font-size: 1.1rem; color: var(--text-header); font-weight:800;">Department of Computer Engineering</h4>
+            <p style="font-size: 0.85rem; color: var(--text-sub);">Self-Learning Activity (SLA) Stage 3 — Implementation & Evaluation</p>
+            <p style="font-size: 0.8rem; color: var(--accent-primary); font-weight: 600;">Subject: Operating Systems (CMCOR2PC202)</p>
+          </div>
+          
+          <div id="report-dynamic-content" style="font-size: 0.85rem; color: var(--text-body); display: flex; flex-direction: column; gap: 14px;">
+            <!-- Generated dynamically -->
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" id="btn-print-report">
+            <i data-lucide="printer" style="width:14px;height:14px;"></i>
+            Print / Save PDF
+          </button>
+          <button class="btn btn-primary" id="btn-close-report-btn">Done</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div class="toast-container" id="toast-container"></div>
+
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
