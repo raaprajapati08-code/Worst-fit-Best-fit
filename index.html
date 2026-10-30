@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OS Memory Management Simulator</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container">
+        <!-- A. Header -->
+        <header>
+            <h1>Operating System Memory Management Simulator</h1>
+            <h2>Dynamic Partitioning & Slab Allocation</h2>
+        </header>
+
+        <!-- B. Input Section -->
+        <section class="card">
+            <h3>1. Configuration & Input</h3>
+            
+            <div class="input-group">
+                <label for="numBlocks">Number of Memory Blocks:</label>
+                <input type="number" id="numBlocks" min="1" value="5">
+                <button type="button" id="generateBlocksBtn">Generate Block Inputs</button>
+            </div>
+            <div id="blockInputsContainer" class="dynamic-inputs"></div>
+
+            <div class="input-group" style="margin-top: 15px;">
+                <label for="numProcesses">Number of Processes:</label>
+                <input type="number" id="numProcesses" min="1" value="4">
+                <button type="button" id="generateProcessesBtn">Generate Process Inputs</button>
+            </div>
+            <div id="processInputsContainer" class="dynamic-inputs"></div>
+
+            <!-- Sample Test Case Button -->
+            <div style="margin-top: 15px;">
+                <button type="button" id="loadSampleBtn" class="secondary-btn">Load Sample Test Case</button>
+            </div>
+        </section>
+
+        <!-- C. Algorithm Selection & D. Simulation Controls -->
+        <section class="card">
+            <h3>2. Algorithm Selection & Controls</h3>
+            <div class="controls-row">
+                <div class="algorithm-selection">
+                    <label><input type="radio" name="algorithm" value="best" checked> Best-Fit</label>
+                    <label><input type="radio" name="algorithm" value="worst"> Worst-Fit</label>
+                    <label><input type="radio" name="algorithm" value="slab"> Slab Allocator</label>
+                    <label><input type="radio" name="algorithm" value="compare"> Compare All</label>
+                </div>
+                <div class="simulation-buttons">
+                    <button type="button" id="runSimulationBtn" class="primary-btn">Run Simulation</button>
+                    <button type="button" id="resetBtn" class="danger-btn">Reset</button>
+                </div>
+            </div>
+
+            <!-- Slab Specific Input -->
+            <div id="slabConfigGroup" class="input-group" style="margin-top: 12px; display: none;">
+                <label for="slabSizeInput">Slab Object Size (KB):</label>
+                <input type="number" id="slabSizeInput" min="1" value="128">
+                <span style="font-size: 11px; color: #555;">(Defines fixed object slot size for the Slab Allocator cache)</span>
+            </div>
+
+            <div id="errorMessage" class="error-msg"></div>
+        </section>
+
+        <!-- E. Results Section -->
+        <section class="card" id="resultsSection" style="display: none;">
+            <h3>3. Allocation Results</h3>
+            <div class="table-container">
+                <table id="resultsTable">
+                    <thead>
+                        <tr>
+                            <th>Process ID</th>
+                            <th>Process Size (KB)</th>
+                            <th id="colBest">Best-Fit Allocation</th>
+                            <th id="colWorst">Worst-Fit Allocation</th>
+                            <th id="colSlab">Slab Allocator</th>
+                            <th>Allocation Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="resultsTableBody">
+                        <!-- Populated via JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- F. Memory Visualisation -->
+        <section class="card" id="visualisationSection" style="display: none;">
+            <h3>4. Memory Block Visualisation</h3>
+            <div id="memoryVisualContainer">
+                <!-- Visual blocks populated via JS -->
+            </div>
+            <div class="legend">
+                <span class="legend-item"><span class="box allocated"></span> Allocated Space</span>
+                <span class="legend-item"><span class="box free"></span> Remaining Free Space</span>
+            </div>
+        </section>
+
+        <!-- G. Performance Summary -->
+        <section class="card" id="summarySection" style="display: none;">
+            <h3>5. Performance Summary</h3>
+            <div id="summaryContent" class="summary-grid">
+                <!-- Summary stats populated via JS -->
+            </div>
+        </section>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

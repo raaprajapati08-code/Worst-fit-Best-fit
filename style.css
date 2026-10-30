@@ -1,0 +1,264 @@
+/* Academic Engineering Project Styling */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f7f9fa;
+    color: #222222;
+    margin: 0;
+    padding: 20px;
+    line-height: 1.4;
+}
+
+.container {
+    max-width: 950px;
+    margin: 0 auto;
+    background: #ffffff;
+    border: 1px solid #cccccc;
+    padding: 20px 30px;
+}
+
+header {
+    text-align: center;
+    border-bottom: 2px solid #003366;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+}
+
+header h1 {
+    color: #003366;
+    font-size: 22px;
+    margin: 0 0 5px 0;
+}
+
+header h2 {
+    color: #444444;
+    font-size: 15px;
+    font-weight: normal;
+    margin: 0;
+}
+
+.card {
+    border: 1px solid #b0c4de;
+    background-color: #ffffff;
+    padding: 15px;
+    margin-bottom: 15px;
+}
+
+.card h3 {
+    color: #003366;
+    font-size: 16px;
+    margin-top: 0;
+    border-bottom: 1px solid #e0e0e0;
+    padding-bottom: 5px;
+}
+
+label {
+    font-size: 13px;
+    font-weight: bold;
+    color: #333333;
+}
+
+input[type="number"] {
+    padding: 4px 8px;
+    border: 1px solid #7f9db9;
+    font-size: 13px;
+    width: 80px;
+}
+
+button {
+    background-color: #e6ecf2;
+    border: 1px solid #7f9db9;
+    color: #003366;
+    padding: 5px 12px;
+    font-size: 13px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+button:hover {
+    background-color: #cfe2f3;
+}
+
+.primary-btn {
+    background-color: #003366;
+    color: #ffffff;
+}
+
+.primary-btn:hover {
+    background-color: #002244;
+}
+
+.danger-btn {
+    background-color: #f2dede;
+    border-color: #ebccd1;
+    color: #a94442;
+}
+
+.danger-btn:hover {
+    background-color: #ebccd1;
+}
+
+.secondary-btn {
+    background-color: #f0f0f0;
+}
+
+.dynamic-inputs {
+    margin-top: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.input-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.controls-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.algorithm-selection {
+    display: flex;
+    gap: 15px;
+    font-size: 13px;
+    flex-wrap: wrap;
+}
+
+.simulation-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.error-msg {
+    color: #cc0000;
+    font-size: 12px;
+    font-weight: bold;
+    margin-top: 8px;
+}
+
+.table-container {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin-top: 5px;
+}
+
+table, th, td {
+    border: 1px solid #b0c4de;
+}
+
+th {
+    background-color: #003366;
+    color: #ffffff;
+    padding: 6px;
+    text-align: center;
+}
+
+td {
+    padding: 6px;
+    text-align: center;
+}
+
+/* Memory Visualisation Styling */
+#memoryVisualContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.block-bar-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+}
+
+.block-label {
+    width: 130px;
+    font-weight: bold;
+}
+
+.block-bar {
+    flex-grow: 1;
+    height: 24px;
+    border: 1px solid #7f9db9;
+    display: flex;
+    background-color: #e2efda;
+}
+
+.seg-allocated {
+    background-color: #fce4d6;
+    border-right: 1px solid #b0c4de;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: bold;
+    color: #a61c1c;
+}
+
+.seg-free {
+    background-color: #e2efda;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    color: #274e13;
+}
+
+.legend {
+    margin-top: 10px;
+    font-size: 12px;
+    display: flex;
+    gap: 20px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.box {
+    width: 14px;
+    height: 14px;
+    border: 1px solid #7f9db9;
+    display: inline-block;
+}
+
+.box.allocated {
+    background-color: #fce4d6;
+}
+
+.box.free {
+    background-color: #e2efda;
+}
+
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 10px;
+    font-size: 13px;
+}
+
+.summary-item {
+    background: #f4f6f9;
+    border: 1px solid #d0d7de;
+    padding: 8px 12px;
+}
+
+.summary-item span {
+    font-weight: bold;
+    color: #003366;
+}
